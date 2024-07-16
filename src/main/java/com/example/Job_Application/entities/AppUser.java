@@ -1,9 +1,6 @@
 package com.example.Job_Application.entities;
 
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.Entity;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
@@ -32,8 +29,9 @@ public class AppUser<T> extends BaseClass implements UserDetails {
     private Boolean isEnabled;
     private String token;
 
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
-    private List<Job> jobsList;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_Id")
+    private Job job;
 
 
     @Override

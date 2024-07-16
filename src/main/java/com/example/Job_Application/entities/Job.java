@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @Table(name = "jobs_tbl")
@@ -22,9 +23,11 @@ public class Job extends BaseClass{
 
     private LocalDateTime datePosted;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_Id")
-    private AppUser user;
+    @OneToMany(mappedBy = "job", cascade = CascadeType.ALL)
+    private List<AppUser> users;
+
+    @OneToMany(mappedBy = "job", cascade = CascadeType.ALL)
+    private List<Admin> admin;
 
 
 }

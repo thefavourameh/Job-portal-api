@@ -16,7 +16,6 @@ import org.springframework.stereotype.Service;
 public class JobServiceImpl implements JobService {
     private final JobRepository jobRepository;
 
-    private final AdminRepository adminRepository;
 
     @Override
     public void deleteJob(Long id) {
@@ -25,13 +24,12 @@ public class JobServiceImpl implements JobService {
 
         jobRepository.delete(job);
 
-
     }
 
     @Override
-    public void updateJob(Long jobId, JobRequest updateRequest) {
-        Job job = jobRepository.findById(jobId)
-                .orElseThrow(() -> new JobNotFoundException("Task not found with id: " + jobId));
+    public void updateJob(Long id, JobRequest updateRequest) {
+        Job job = jobRepository.findById(id)
+                .orElseThrow(() -> new JobNotFoundException("Job not found with id: " + id));
 
         if (updateRequest.getTitle() != null) job.setTitle(updateRequest.getTitle());
         if (updateRequest.getDescription() != null) job.setDescription(updateRequest.getDescription());

@@ -19,7 +19,6 @@ public interface UserService {
     public RegisterResponse register(RegisterRequest registerRequest) throws JsonProcessingException;
     public AuthenticationResponse authenticate(AuthenticationRequest request);
     UserResponse editUser(Long id, UpdateUserRequest updateUserRequest);
-
     UserResponse viewUser(Long id);
     public String resetPassword(String email, String oldPassword, String newPassword);
     String forgotPassword(String email, String newPassword, String confirmPassword);

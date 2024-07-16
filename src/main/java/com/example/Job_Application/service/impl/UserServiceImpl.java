@@ -63,10 +63,6 @@ public class UserServiceImpl implements UserService {
 
 
     private  final Logger logger = LoggerFactory.getLogger(UserServiceImpl.class);
-    @Autowired
-    private HttpServletResponse response;
-
-    private final Set<String> invalidatedTokens = ConcurrentHashMap.newKeySet();
 
     @Override
     public RegisterResponse register(@Valid RegisterRequest registerRequest) throws JsonProcessingException {
@@ -161,7 +157,7 @@ public class UserServiceImpl implements UserService {
                 .responseMessage(UserUtils.USER_UPDATE_MESSAGE)
                 .firstName(appUser.getFirstName())
                 .lastName(appUser.getLastName())
-                .dateOfBirth(appUser.getCurriculumVitae())
+                .dateOfBirth(appUser.getDateOfBirth())
                 .curriculumVitae(appUser.getCurriculumVitae())
                 .build();
     }
