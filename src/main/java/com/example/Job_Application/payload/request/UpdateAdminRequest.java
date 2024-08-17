@@ -12,7 +12,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class RegisterRequest {
+public class UpdateAdminRequest {
     @Size(min = 2, max = 125, message = "Firstname must be at least 2 characters long")
     @NotBlank(message = "Firstname must not be empty")
     private String firstName;
@@ -25,12 +25,12 @@ public class RegisterRequest {
     @Email
     private String email;
 
-    @NotBlank(message = "Date of Birth must not be empty")
-    private String dateOfBirth;
+    @Size(min = 2, max = 125, message = "Company name must be at least 2 characters long")
+    @NotBlank(message = "Company Name must not be empty")
+    private String companyName;
 
-    private String curriculumVitae;
+    @NotBlank(message = "Identity Number must not be empty")
+    private String identityNumber;
 
-    @Size(min = 6, max = 25, message = "Password must be at least 6 characters long")
-    @NotBlank(message = "Password must not be empty")
-    private String password;
+
 }

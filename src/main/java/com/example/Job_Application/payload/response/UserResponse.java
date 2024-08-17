@@ -14,6 +14,7 @@ import lombok.Setter;
 @JsonInclude(JsonInclude.Include.NON_DEFAULT)
 public class UserResponse<T> {
     private String responseMessage;
+    private Long id;
     private String firstName;
     private String lastName;
     private String email;
@@ -21,8 +22,9 @@ public class UserResponse<T> {
     private String curriculumVitae;
     private T data;
 
-    public UserResponse(String responseMessage, String firstName, String lastName, String email, String dateOfBirth, String curriculumVitae,  T data) {
+    public UserResponse(String responseMessage, Long id, String firstName, String lastName, String email, String dateOfBirth, String curriculumVitae,  T data) {
         this.responseMessage = responseMessage;
+        this.id = id;
         this.firstName = firstName;
         this.lastName = lastName;
         this.email = email;

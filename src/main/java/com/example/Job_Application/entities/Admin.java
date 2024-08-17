@@ -17,22 +17,23 @@ import java.util.List;
 @NoArgsConstructor
 @Entity
 @Table(name = "admin_tbl")
-public class Admin extends BaseClass implements UserDetails {
+public class Admin<T> extends BaseClass implements UserDetails {
     private String firstName;
     private String lastName;
     @Email
     private String email;
+    private String companyName;
+    private String identityNumber;
     private String password;
     private Boolean isEnabled;
     private String token;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "admin_Id")
-    private Job job;
+    @OneToMany(mappedBy = "admin", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Job> jobs;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return List.of(new SimpleGrantedAuthority("ADMIN"));
+        return List.of(new SimpleGrantedAuthority("ROLE_ADMIN"));
     }
 
 

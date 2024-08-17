@@ -29,9 +29,8 @@ public class AppUser<T> extends BaseClass implements UserDetails {
     private Boolean isEnabled;
     private String token;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_Id")
-    private Job job;
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Job> jobs;
 
 
     @Override

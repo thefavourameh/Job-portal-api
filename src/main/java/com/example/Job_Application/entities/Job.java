@@ -1,8 +1,11 @@
 package com.example.Job_Application.entities;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
 import lombok.*;
+import org.springframework.format.annotation.DateTimeFormat;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -13,7 +16,7 @@ import java.util.List;
 @Builder
 @Getter
 @Setter
-public class Job extends BaseClass{
+public class Job extends BaseClass {
 
     private String title;
 
@@ -21,13 +24,15 @@ public class Job extends BaseClass{
 
     private String Responsibilities;
 
-    private LocalDateTime datePosted;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy")
+    private LocalDate deadline;
 
-    @OneToMany(mappedBy = "job", cascade = CascadeType.ALL)
-    private List<AppUser> users;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id")
+    private AppUser user;
 
-    @OneToMany(mappedBy = "job", cascade = CascadeType.ALL)
-    private List<Admin> admin;
-
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "admin_id")
+    private Admin admin;
 
 }

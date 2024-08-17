@@ -20,5 +20,9 @@ public class UserUtils {
     public final static String INVALID_EMAIL_DOMAIN_MESSAGE = "Invalid email domain";
     public static String USER_UPDATE_MESSAGE = "This user have been Updated Successfully!";
     public static String USER_DETAILS_MESSAGE = "USER DETAILS";
+    public static String ALL_USER_DETAILS_MESSAGE = "ALL USERS DETAILS";
+    public static String ADMIN_UPDATE_MESSAGE = "This Admin has been Updated Successfully!";
+    public static String ADMIN_DETAILS_MESSAGE = "ALL ADMIN DETAILS";
+    public static String SINGLE_ADMIN_DETAILS_MESSAGE = "ADMIN DETAILS";
 
 }

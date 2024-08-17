@@ -1,10 +1,13 @@
 package com.example.Job_Application.controller;
 
 import com.example.Job_Application.config.JwtService;
-import com.example.Job_Application.payload.request.AuthenticationRequest;
-import com.example.Job_Application.payload.request.RegisterRequest;
-import com.example.Job_Application.payload.response.AuthenticationResponse;
-import com.example.Job_Application.payload.response.RegisterResponse;
+import com.example.Job_Application.entities.Admin;
+import com.example.Job_Application.entities.Job;
+import com.example.Job_Application.exception.AdminNotFoundException;
+import com.example.Job_Application.exception.JobNotFoundException;
+import com.example.Job_Application.exception.UserNotFoundException;
+import com.example.Job_Application.payload.request.*;
+import com.example.Job_Application.payload.response.*;
 import com.example.Job_Application.repository.AdminRepository;
 import com.example.Job_Application.service.AdminService;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -18,6 +21,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -26,48 +30,28 @@ import java.util.Map;
 public class AdminController {
     private final JwtService jwtService;
     private final AdminService adminService;
-    private final AdminRepository adminRepository;
 
-    @PostMapping("/register-admin")
-    public ResponseEntity<?> register(@Validated
-                                      @RequestBody RegisterRequest registerRequest, BindingResult bindingResult) throws JsonProcessingException {
-
-        if (bindingResult.hasErrors()) {
-            Map<String, String> errors = new HashMap<>();
-            for (FieldError error : bindingResult.getFieldErrors()) {
-                errors.put(error.getField(), error.getDefaultMessage());
-            }
-            return ResponseEntity.badRequest().body(errors);
-        }
-
-        RegisterResponse authenticationResponse = adminService.register(registerRequest);
-        return ResponseEntity.ok(authenticationResponse);
+    @PutMapping("/edit-admin/{id}")
+    public ResponseEntity<AdminResponse> editAdmin(@PathVariable Long id, @RequestBody UpdateAdminRequest updateAdminRequest) {
+        AdminResponse updatedAdmin = adminService.editAdmin(id, updateAdminRequest);
+        return new ResponseEntity<>(updatedAdmin, HttpStatus.CREATED);
     }
 
-    @PostMapping("/login-admin")
-    public ResponseEntity<AuthenticationResponse> authenticate(@RequestBody AuthenticationRequest request){
-        return ResponseEntity.ok(adminService.authenticate(request));
+    @PutMapping("/reset-password-admin/{id}")
+    public ResponseEntity<String> resetPassword(@PathVariable Long id, @RequestParam String email, @RequestParam String oldPassword, @RequestParam String newPassword){
+        return new ResponseEntity<>(adminService.resetPassword(id, email, oldPassword, newPassword), HttpStatus.OK);
     }
 
 
-    @PutMapping("/reset-password-admin")
-    public ResponseEntity<String> resetPassword(@RequestParam String email, String oldPassword, @RequestHeader String newPassword){
-        return new ResponseEntity<>(adminService.resetPassword(email,oldPassword, newPassword), HttpStatus.OK);
-    }
-
-
-    @PostMapping("/reset-forgot-password-admin")
-    public String resetForgotPassword(@RequestParam("newPassword") String newPassword,
-                                      @RequestParam("confirmPassword") String confirmPassword,
-                                      @RequestParam("email") String email) {
-        return adminService.forgotPassword(email,newPassword, confirmPassword);
-    }
-
-    @PostMapping("/refreshToken-admin")
-    public ResponseEntity<?> refreshToken(@RequestHeader("Authorization") String refreshTokenHeader) {
-
+    @PostMapping("/refreshToken-admin/{id}")
+    public ResponseEntity<?> refreshToken(@PathVariable Long id, @RequestHeader("Authorization") String refreshTokenHeader) {
         String username = jwtService.extractUsernameFromToken(refreshTokenHeader);
+        Admin admin = adminService.findById(id)
+                .orElseThrow(() -> new UserNotFoundException("Admin not found with ID: " + id));
 
+        if (!username.equals(admin.getEmail())) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Token does not belong to this admin");
+        }
         UserDetails userDetails = adminService.loadUserByUsername(username);
 
         String newAccessToken = jwtService.generateToken(userDetails);
@@ -75,7 +59,26 @@ public class AdminController {
         return ResponseEntity.ok(newAccessToken);
     }
 
+    @GetMapping("/view-admin/{id}")
+    public ResponseEntity<AdminResponse> viewAdmin(@PathVariable Long id) {
+        try {
+            AdminResponse adminResponse = adminService.viewAdmin(id);
+            return ResponseEntity.ok(adminResponse);
+        } catch (AdminNotFoundException ex) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+        }
+    }
 
+    @GetMapping("/all-admins")
+    public ResponseEntity<List<AdminResponse>> viewAllAdmins() {
+        List<AdminResponse> admins = adminService.viewAllAdmins();
+        return ResponseEntity.ok(admins);
+    }
+
+    @PostMapping("/logout-admin/{id}")
+    public String logoutAdmin(@PathVariable Long id) {
+        return adminService.logoutAdmin(id);
+    }
 
 }
 

@@ -2,10 +2,15 @@ package com.example.Job_Application.controller;
 
 
 import com.example.Job_Application.config.JwtService;
+import com.example.Job_Application.entities.Admin;
+import com.example.Job_Application.entities.AppUser;
+import com.example.Job_Application.exception.UsernameNotFoundException;
 import com.example.Job_Application.payload.request.AuthenticationRequest;
+import com.example.Job_Application.payload.request.RegisterAdminRequest;
 import com.example.Job_Application.payload.request.RegisterRequest;
 import com.example.Job_Application.payload.response.AuthenticationResponse;
 import com.example.Job_Application.payload.response.RegisterResponse;
+import com.example.Job_Application.service.impl.AdminServiceImpl;
 import com.example.Job_Application.service.impl.UserServiceImpl;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.RequiredArgsConstructor;
@@ -26,6 +31,8 @@ import java.util.Map;
 public class AuthController {
     private final UserServiceImpl userService;
 
+    private final AdminServiceImpl adminService;
+
     private final JwtService jwtService;
 
     @PostMapping("/register-user")
@@ -44,39 +51,43 @@ public class AuthController {
         return ResponseEntity.ok(authenticationResponse);
     }
 
-    @PostMapping("/login")
-    public ResponseEntity<AuthenticationResponse> authenticate(@RequestBody AuthenticationRequest request){
-        return ResponseEntity.ok(userService.authenticate(request));
+    @PostMapping("/register-admin")
+    public ResponseEntity<?> registerAdmin(@Validated
+                                           @RequestBody RegisterAdminRequest registerAdminRequest, BindingResult bindingResult) throws JsonProcessingException {
+
+        if (bindingResult.hasErrors()) {
+            Map<String, String> errors = new HashMap<>();
+            for (FieldError error : bindingResult.getFieldErrors()) {
+                errors.put(error.getField(), error.getDefaultMessage());
+            }
+            return ResponseEntity.badRequest().body(errors);
+        }
+
+        RegisterResponse authenticationResponse = adminService.register(registerAdminRequest);
+        return ResponseEntity.ok(authenticationResponse);
     }
 
+    @PostMapping("/login/{id}")
+    public ResponseEntity<AuthenticationResponse> authenticate(@PathVariable Long id, @RequestBody AuthenticationRequest request){
+            AppUser appUser = userService.findById(id)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found with ID: " + id));
 
-    @PutMapping("/reset-password")
-    public ResponseEntity<String> resetPassword(@RequestParam String email,  String oldPassword,@RequestHeader String newPassword){
-        return new ResponseEntity<>(userService.resetPassword(email,oldPassword, newPassword), HttpStatus.OK);
+        AuthenticationResponse response = userService.authenticate(appUser, request);
+        return ResponseEntity.ok(response);
     }
 
+    @PostMapping("/login-admin/{id}")
+    public ResponseEntity<AuthenticationResponse> authenticateAdmin(@PathVariable Long id, @RequestBody AuthenticationRequest request) {
+        Admin admin = adminService.findById(id)
+                .orElseThrow(() -> new UsernameNotFoundException("Admin not found with ID: " + id));
 
-    @PostMapping("/reset-forgot-password")
-    public String resetForgotPassword(@RequestParam("newPassword") String newPassword,
-                                @RequestParam("confirmPassword") String confirmPassword,
-                                @RequestParam("email") String email) {
-        return userService.forgotPassword(email,newPassword, confirmPassword);
+        AuthenticationResponse response = adminService.authenticateAdmin(admin, request);
+        return ResponseEntity.ok(response);
     }
 
-    @PostMapping("/refreshToken")
-    public ResponseEntity<?> refreshToken(@RequestHeader("Authorization") String refreshTokenHeader) {
-
-        String username = jwtService.extractUsernameFromToken(refreshTokenHeader);
-
-        UserDetails userDetails = userService.loadUserByUsername(username);
-
-        String newAccessToken = jwtService.generateToken(userDetails);
-
-        return ResponseEntity.ok(newAccessToken);
-    }
-    @PostMapping("/logout")
-    public String logout() {
-       return userService.logout();
+    @PostMapping("/logout/{id}")
+    public String logout(@PathVariable Long id) {
+       return userService.logout(id);
     }
 
 
